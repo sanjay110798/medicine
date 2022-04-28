@@ -1,0 +1,234 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+if (file_exists(storage_path('installed'))) {
+Route::get('/', 'FrontendController@index')->name('home');
+}else{
+Route::get('/', function () {
+    return view('vendor.installer.firstpage');
+});
+}
+Route::get('/login', 'FrontendController@index');
+Route::get('/register', 'FrontendController@index');
+
+Route::get('/checkpincode', 'FrontendController@checkpin')->name('checkpincode');
+Route::post('/sendotp', 'FrontendController@sendotp')->name('sendotp');
+Route::get('/registration', 'FrontendController@registration')->name('signup');
+Route::get('/otp', 'FrontendController@otpPage')->name('otp.page');
+Route::post('/checkotp', 'FrontendController@checkotp')->name('checkotp');
+Route::post('/registration', 'FrontendController@insertUser')->name('user.insert');
+
+Route::get('/about-us', 'FrontendController@aboutUs')->name('about.us');
+Route::get('/our-story', 'FrontendController@story')->name('our.story');
+Route::get('/contact-us', 'FrontendController@contactus')->name('contact.us');
+Route::get('/faq', 'FrontendController@faq')->name('faq.page');
+Route::get('/return-policy', 'FrontendController@returnPolicy')->name('return.policy');
+Route::get('/terms-condition', 'FrontendController@termCondition')->name('terms.condition');
+Route::get('/privacy-policy', 'FrontendController@privacyPolicy')->name('privacy.policy');
+Route::post('/search', 'ProductController@search')->name('home.search');
+
+Route::post('/get-state', 'CartController@getState')->name('get.state');
+Route::post('/get-city', 'CartController@getCity')->name('get.city');
+Route::post('/get-pincode', 'CartController@getPincode')->name('get.pincode');
+/////////////////Cart///////////////////
+Route::get('/add-to-cart/{product_id}', 'ProductController@addToCart')->name('add.to.cart');
+Route::get('/cart', 'CartController@index')->name('cart');
+Route::get('/cart-delete/{id}', 'CartController@deleteCart')->name('cart.delete');
+Route::get('/checkout-products', 'CartController@checkoutProduct')->name('checkout');
+Route::get('/prescription-choose', 'CartController@prescriptionChoose')->name('prescription.choose');
+Route::get('/prescription-img-del/{id}', 'CartController@preImgDel')->name('preimg.delete');
+Route::post('/post-image-upload', 'CartController@PreImage')->name('upload.pre.image');
+Route::post('/submit-pre', 'CartController@submitPre')->name('submit.pre.form');
+Route::post('/make-order', 'CartController@makeOrder')->name('make.order');
+Route::get('/order-interval/{orderid}', 'CartController@orderInterval')->name('order.interval');
+Route::post('/set-interval', 'CartController@setInterval')->name('set.interval');
+Route::get('/thank-you', 'CartController@thankyou')->name('thankyou');
+/////////////////Buy//////////////////
+Route::get('/buy-product/{product_id}', 'CartController@buyProduct')->name('buy.product');
+///////////////////Product Page///////////////////
+Route::get('/products', 'ProductController@index')->name('product.page');
+Route::get('/products-details/{slug}', 'ProductController@productDetails')->name('product.details');
+
+
+Route::group(['prefix' => 'admin'], function() {
+    Route::get('/login','Admin\AdminController@login')->name('admin.login');
+    Route::post('/authenticate','Admin\AdminController@authenticate')->name('admin.authenticate');
+});
+Auth::routes();
+Route::group(['prefix' => 'user','middleware' => ['auth']], function() {
+    Route::get('/profile','User\ProfileController@index')->name('user.profile');
+    Route::post('/update-profile','User\ProfileController@updateProfile')->name('user.update.profile');
+
+    ///////////////////
+    Route::get('/order','User\ProfileController@order')->name('user.order');
+    Route::get('/subscription','User\ProfileController@subscription')->name('user.subscription');
+    Route::get('/address','User\ProfileController@address')->name('user.address');
+    Route::get('/prescription','User\ProfileController@prescription')->name('user.prescription');
+    Route::get('/wallet','User\ProfileController@wallet')->name('user.wallet');
+    Route::post('/wallet-req-add','User\ProfileController@walletReqAdd')->name('user.wallet.req.add');
+    Route::get('/jaayu/wallet','User\ProfileController@jaayuwallet')->name('user.jaayu.wallet');
+    Route::get('/help','User\ProfileController@help')->name('user.help');
+    Route::get('/legal','User\ProfileController@legal')->name('user.legal');
+    Route::post('/save-address','User\ProfileController@saveAddress')->name('save.address');
+    Route::get('/delete-address/{id}','User\ProfileController@deleteAddress')->name('delete.shipping.address');
+    Route::post('/edit-address/{id}','User\ProfileController@editAddress')->name('edit.address');
+});
+
+Route::group(['prefix' => 'admin','middleware' => ['auth']], function() {
+    Route::get('/dashboard','Admin\DashboardController@index')->name('admin.dashboard');
+    Route::get('/profile','Admin\DashboardController@profile')->name('admin.profile');
+    Route::post('/profile','Admin\DashboardController@profileUpdate')->name('admin.profile.update');
+    /////////////////////////////////
+    Route::get('/sitemap-list','Admin\SeoController@list')->name('admin.sitemap.setting');
+    Route::get('/add-sitemap','Admin\SeoController@add')->name('admin.sitemap.add');
+    Route::get('/edit-sitemap/{id}','Admin\SeoController@edit')->name('admin.sitemap.edit');
+    Route::post('/add-sitemap','Admin\SeoController@insert')->name('admin.sitemap.insert');
+    Route::post('/edit-sitemap/{id}','Admin\SeoController@update')->name('admin.sitemap.update');
+    Route::get('/delete-sitemap/{id}','Admin\SeoController@deleteSitemap')->name('admin.sitemap.delete');
+   
+    ///////////////////////////////////
+    Route::get('/user-list','Admin\UserController@list')->name('admin.user.list');
+    Route::get('/add-user','Admin\UserController@add')->name('admin.user.add');
+    Route::get('/edit-user/{id}','Admin\UserController@edit')->name('admin.user.edit');
+    Route::post('/add-user','Admin\UserController@insert')->name('admin.user.insert');
+    Route::post('/edit-user/{id}','Admin\UserController@update')->name('admin.user.update');
+    Route::get('/delete-user/{id}','Admin\UserController@deleteUser')->name('admin.user.delete');
+    Route::post('/user-status-change','Admin\UserController@statusChange')->name('admin.user.changestatus');
+    ///////////////////////////////////
+    Route::get('/vender-list','Admin\VenderController@list')->name('admin.vender.list');
+    Route::get('/add-vender','Admin\VenderController@add')->name('admin.vender.add');
+    Route::get('/edit-vender/{id}','Admin\VenderController@edit')->name('admin.vender.edit');
+    Route::post('/add-vender','Admin\VenderController@insert')->name('admin.vender.insert');
+    Route::post('/edit-vender/{id}','Admin\VenderController@update')->name('admin.vender.update');
+    Route::get('/delete-vender/{id}','Admin\VenderController@deleteUser')->name('admin.vender.delete');
+    ///////////////////////////////////
+    Route::get('/slider-list','Admin\SliderController@list')->name('admin.slider');
+    Route::get('/add-slider','Admin\SliderController@add')->name('admin.slider.add');
+    Route::get('/edit-slider/{id}','Admin\SliderController@edit')->name('admin.slider.edit');
+    Route::post('/add-slider','Admin\SliderController@insert')->name('admin.slider.insert');
+    Route::post('/edit-slider/{id}','Admin\SliderController@update')->name('admin.slider.update');
+    Route::get('/delete-slider/{id}','Admin\SliderController@deleteSlider')->name('admin.slider.delete');
+    ///////////////////////////////////
+    Route::get('/route-pages-list','Admin\RoutePagesController@list')->name('admin.route.pages');
+    Route::get('/add-route-pages','Admin\RoutePagesController@add')->name('admin.route.pages.add');
+    Route::get('/edit-route-pages/{id}','Admin\RoutePagesController@edit')->name('admin.route.pages.edit');
+    Route::post('/add-route-pages','Admin\RoutePagesController@insert')->name('admin.route.pages.insert');
+    Route::post('/edit-route-pages/{id}','Admin\RoutePagesController@update')->name('admin.route.pages.update');
+    Route::get('/delete-route-pages/{id}','Admin\RoutePagesController@deletePages')->name('admin.route.pages.delete');
+    /////////////////////////////////
+    Route::get('/pages-content-list','Admin\PagesController@list')->name('admin.pages');
+    Route::get('/add-pages-content','Admin\PagesController@add')->name('admin.pages.add');
+    Route::get('/edit-pages-content/{id}','Admin\PagesController@edit')->name('admin.pages.edit');
+    Route::post('/add-pages-content','Admin\PagesController@insert')->name('admin.pages.insert');
+    Route::post('/edit-pages-content/{id}','Admin\PagesController@update')->name('admin.pages.update');
+    Route::get('/delete-pages-content/{id}','Admin\PagesController@deletePages')->name('admin.pages.delete');
+    ///////////////////////////////////
+    Route::get('/benefit-list','Admin\BenefitController@list')->name('admin.benefit');
+    Route::get('/add-benefit','Admin\BenefitController@add')->name('admin.benefit.add');
+    Route::get('/edit-benefit/{id}','Admin\BenefitController@edit')->name('admin.benefit.edit');
+    Route::post('/add-benefit','Admin\BenefitController@insert')->name('admin.benefit.insert');
+    Route::post('/edit-benefit/{id}','Admin\BenefitController@update')->name('admin.benefit.update');
+    Route::get('/delete-benefit/{id}','Admin\BenefitController@deleteBenefit')->name('admin.benefit.delete');
+    ///////////////////////////////////
+    Route::get('/pincode-list','Admin\PincodeController@list')->name('admin.pincode.list');
+    Route::get('/add-pincode','Admin\PincodeController@add')->name('admin.pincode.add');
+    Route::get('/edit-pincode/{id}','Admin\PincodeController@edit')->name('admin.pincode.edit');
+    Route::post('/add-pincode','Admin\PincodeController@insert')->name('admin.pincode.insert');
+    Route::post('/edit-pincode/{id}','Admin\PincodeController@update')->name('admin.pincode.update');
+    Route::get('/delete-pincode/{id}','Admin\PincodeController@deletePincode')->name('admin.pincode.delete');
+    Route::post('/pincode-status-change','Admin\PincodeController@statusChange')->name('admin.pincode.changestatus');
+    /////////////////////////////////////////////
+    Route::get('/category', 'Admin\CategoryController@index')->name('admin.category.list');
+
+    Route::post('/category/add', 'Admin\CategoryController@store')->name('admin.category.add');
+
+    Route::post('/category/edit/{id}', 'Admin\CategoryController@update')->name('admin.category.edit');
+
+    Route::get('/category/delete/{id}', 'Admin\CategoryController@del')->name('admin.category.del');
+
+    //////////////Brand//////////////
+    Route::get('/brand', 'Admin\BrandController@index')->name('admin.brand.list');
+
+    Route::post('/brand/add', 'Admin\BrandController@store')->name('admin.brand.add');
+
+    Route::post('/brand/edit/{id}', 'Admin\BrandController@update')->name('admin.brand.edit');
+
+    Route::get('/brand/delete/{id}', 'Admin\BrandController@del')->name('admin.brand.del');
+
+    //////////////Country//////////////
+    Route::get('/country', 'Admin\CountryController@index')->name('admin.country');
+
+    Route::post('/country/add', 'Admin\CountryController@store')->name('admin.country.add');
+
+    Route::post('/country/edit/{id}', 'Admin\CountryController@update')->name('admin.country.edit');
+
+    Route::get('/country/delete/{id}', 'Admin\CountryController@del')->name('admin.country.del');
+    //////////////State//////////////
+    Route::get('/state', 'Admin\StateController@index')->name('admin.state');
+
+    Route::post('/state/add', 'Admin\StateController@store')->name('admin.state.add');
+
+    Route::post('/state/edit/{id}', 'Admin\StateController@update')->name('admin.state.edit');
+
+    Route::get('/state/delete/{id}', 'Admin\StateController@del')->name('admin.state.del');
+    //////////////City//////////////
+    Route::get('/city', 'Admin\CityController@index')->name('admin.city');
+
+    Route::post('/city/add', 'Admin\CityController@store')->name('admin.city.add');
+
+    Route::post('/city/edit/{id}', 'Admin\CityController@update')->name('admin.city.edit');
+
+    Route::get('/city/delete/{id}', 'Admin\CityController@del')->name('admin.city.del');
+    /////////////////////////////////////////////////
+    Route::get('/product-list','Admin\ProductController@list')->name('admin.product.list');
+    Route::get('/add-product','Admin\ProductController@add')->name('admin.product.add');
+    Route::post('/get-subcategory', 'Admin\ProductController@getSubCategory')->name('admin.get.sub_category');
+    Route::get('/add-csv-product','Admin\ProductController@addCsv')->name('admin.productcsv.add');
+    Route::post('/add-csv-product','Admin\ProductController@insertCsv')->name('admin.product.csvupload');
+    Route::get('/edit-product/{id}','Admin\ProductController@edit')->name('admin.product.edit');
+    Route::post('/add-product','Admin\ProductController@insert')->name('admin.product.insert');
+    Route::post('/edit-product/{id}','Admin\ProductController@update')->name('admin.product.update');
+    Route::get('/delete-product/{id}','Admin\ProductController@deleteProduct')->name('admin.product.delete');
+    Route::post('/product-status-change','Admin\ProductController@statusChange')->name('admin.product.changestatus');
+    ///////////////////////////////
+    Route::get('/site-setting','Admin\SiteController@index')->name('admin.site.setting');
+    Route::post('/update-setting', 'Admin\SiteController@update')->name('admin.update.settngs');
+    /////////////Order//////////////////
+     Route::get('/order-list','Admin\OrderController@index')->name('admin.order.list');
+    Route::post('/update-order-status', 'Admin\OrderController@statusChange')->name('admin.order.status.change');
+    Route::get('/order-delete/{id}','Admin\OrderController@deleteOrder')->name('admin.order.delete');
+    /////////////Self Order//////////////////
+   
+     Route::get('/self-order-add','Admin\SelfOrderController@add')->name('admin.self.order.add');
+    Route::post('/add-self-user', 'Admin\SelfOrderController@insertUser')->name('admin.add.self.user');
+    Route::post('/add-self-user-address', 'Admin\SelfOrderController@insertUserAddress')->name('admin.add.self.address');
+    Route::get('/get-product-details', 'Admin\SelfOrderController@storeTempProduct')->name('get.product.details');
+    Route::get('/get-product-list', 'Admin\SelfOrderController@getProduct')->name('get.product.list');
+     Route::get('/remove-temp-order', 'Admin\SelfOrderController@removeOrder')->name('remove.temp.order');
+      Route::get('/remove-ordertemp', 'Admin\SelfOrderController@removeOrderTemp')->name('remove.ordertemp');
+    Route::get('/get-total', 'Admin\SelfOrderController@getTotal')->name('get.total');
+    Route::post('/add-self-update-order', 'Admin\SelfOrderController@insert')->name('admin.self.order.insert');
+    Route::post('/self-update-order-status', 'Admin\SelfOrderController@statusChange')->name('admin.self.order.status.change');
+    Route::get('/self-order-delete/{id}','Admin\SelfOrderController@deleteOrder')->name('admin.self.order.delete');
+
+    Route::get('/get-user-det','Admin\SelfOrderController@getUser')->name('get.user.details');
+    ///////////////////////////////
+    Route::get('/wallet-user-list','Admin\WalletController@list')->name('admin.wallet.userlist');
+    Route::post('/wallet-add','Admin\WalletController@add')->name('admin.wallet.add');
+    Route::get('/wallet-status-change/{id}/{status}','Admin\WalletController@statusChange')->name('admin.wallet.status.change');
+    Route::get('/wallet-request-list','Admin\WalletController@requestList')->name('admin.wallet.request.list');
+    Route::get('/wallet-history-list','Admin\WalletController@historyList')->name('admin.wallet.history.list');
+    
+    ////////////////////////////////
+});
